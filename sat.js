@@ -33,7 +33,7 @@ function readFormula(fileName){
         }
     }
     
-    console.log(NUM_VARS, NUM_CLAU);
+   // console.log(NUM_VARS, NUM_CLAU);
 
     var arrayVar = [];
     var arrayClau = [];
@@ -44,7 +44,7 @@ function readFormula(fileName){
         arrayVar.push(aux);
     }
 
-    console.log(arrayVar);
+    //console.log(arrayVar);
 
     // Fazendo o array de Clausulas
     for (let i = 1; i <= NUM_CLAU; i++){
@@ -61,23 +61,59 @@ function readFormula(fileName){
     
     var arrayDosTestes = get2NCombs(NUM_VARS);
 
-    for (let i = 0; i < arrayDosTestes.length; i++){
-        let boolean = doTest(arrayDosTestes[i]);
+    console.log(arrayDosTestes);
 
-            if(boolean){
+    for (let i = 0; i < arrayDosTestes.length; i++){
+        let booleanDaClau = doTest(arrayDosTestes[i], arrayClau);
+           
+        // procura por um true
+            if(booleanDaClau){
                 console.log('É solúvel');
+                console.log(arrayDosTestes[i]);
                 break;
-            }else if (i < arrayDosTestes-1){
-                console.log('Chegou no ultimo mas nao eh soluvel');
+            }
+        //Se tiver chegado no ultimo e nao tiver achado nenhum true, é porque nao tem solução
+            else if (i === arrayDosTestes.length-1){
+                console.log(i);
             }
     }
 
 }
 
-function doTest(arrayBooleano){
+function doTest(arrayBooleano, arrayClau){
     // Aqui tem que testar a combinação de true/false nas clausulas
+   for (let i = 0; i < arrayBooleano.length; i++){
+       if (!doClau(arrayBooleano, arrayClau[i])){
+             //console.log(i, ' Retornou false');
+             return false;
+       }
+   }
+   return true;
+}
 
+function doClau(arrayBooleano, arrayClauI){
+    //erro aq
+    for (let i = 0; i < arrayClauI.length; i++){
+        let auxIndex;
 
+        // Achar a variavel no arrayBool
+        // Mudar o valor caso tenha um '-'
+        if (arrayClauI[i].charAt(0) === '-'){
+            auxIndex = parseInt(arrayClauI[i].charAt(1))-1;
+            if (arrayBooleano[auxIndex])
+                arrayBooleano[auxIndex] = false;
+            else
+                arrayBooleano[auxIndex] = true;
+        }else{
+            auxIndex = parseInt(arrayClauI[i].charAt(0))-1;
+        }
+        // procurar um Verdadeiro
+        if (arrayBooleano[auxIndex] === true){
+            return true;
+        }
+      }
+    // se nao achar nenhum TRUE recebe false
+    return false;
 }
 
 function Variavel(id){
@@ -96,6 +132,12 @@ function get2NCombs(n){
         let textAux = (i).toString(2);
         let arrayAux = [];
 
+        // Preenchendo o text2Aux
+        let diff = n - textAux.length;
+        for (let i = 0; i < diff; i++){
+            textAux = '0' + textAux;
+        }
+
         // preenchendo o arrayAux
         for (let j = 0; j < textAux.length; j++){
             if (textAux.charAt(j) == 1)
@@ -103,26 +145,16 @@ function get2NCombs(n){
             else
                 arrayAux.push(false);
         }
-        
-        // inserir a combinacao em forma de array
-        arrayCombinations.push(arrayAux); 
+
+    // inserir a combinacao em forma de array
+    arrayCombinations.push(arrayAux); 
     }
 
-    for (let i = 0; i < n; i++){
-        // Ver quantos 'false'/'0' falta no array
-        let quantoFalta =  n - arrayCombinations[i].length;
-
-            // adicionar os false (se faltar 0, logo, 0 < 0 nem entra)
-            for (let j = 0; j < quantoFalta; j++){
-                arrayCombinations[i].unshift(false);
-            }
-    }
-        //arrayCombinations[3].unshift(false);
     return arrayCombinations;
 }
 
-// 0 - 0
-// 1 - 1
+// 0 - 00
+// 1 - 01
 // 2 - 10
 // 3 - 11
 // 4 - 100
@@ -130,4 +162,5 @@ function get2NCombs(n){
 // 6 - 110
 // 7 - 111
 
+//readFormula('/home/CIN/alpvj/Desktop/hole1.cnf');
 //readFormula('/home/andrevas/Desktop/if669/hole1.cnf');
