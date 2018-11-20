@@ -59,30 +59,35 @@ function readFormula(fileName){
 
     console.log(arrayClau);
     
-    var arrayDosTestes = get2NCombs(NUM_VARS);
+    const arrayDosTestes = get2NCombs(NUM_VARS);
 
     console.log(arrayDosTestes);
+    
+    // ERRADO A PARTIR DAQUI
 
     for (let i = 0; i < arrayDosTestes.length; i++){
+        console.log('\n' +'Versao: '+ i);
+        console.log(arrayDosTestes);
+        console.log('Estou em: ' +i);
         let booleanDaClau = doTest(arrayDosTestes[i], arrayClau);
            
         // procura por um true
             if(booleanDaClau){
-                console.log('É solúvel');
+                console.log(i+' é solúvel');
                 console.log(arrayDosTestes[i]);
-                break;
             }
         //Se tiver chegado no ultimo e nao tiver achado nenhum true, é porque nao tem solução
-            else if (i === arrayDosTestes.length-1){
-                console.log(i);
+            else {//if (i === arrayDosTestes.length-1){
+                console.log(i, 'nao satisfaz');
+                console.log(arrayDosTestes[i]);
             }
     }
 
 }
-
+//errado
 function doTest(arrayBooleano, arrayClau){
     // Aqui tem que testar a combinação de true/false nas clausulas
-   for (let i = 0; i < arrayBooleano.length; i++){
+   for (let i = 0; i < arrayClau.length; i++){
        if (!doClau(arrayBooleano, arrayClau[i])){
              //console.log(i, ' Retornou false');
              return false;
@@ -90,7 +95,7 @@ function doTest(arrayBooleano, arrayClau){
    }
    return true;
 }
-
+//errado
 function doClau(arrayBooleano, arrayClauI){
     //erro aq
     for (let i = 0; i < arrayClauI.length; i++){
