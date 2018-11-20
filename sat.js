@@ -19,7 +19,7 @@ function readFormula(fileName){
             text.push(aux);
     }
 
-    console.log(text);
+    //console.log(text);
 
     // Pegando o numero de clauses e vars
     var NUM_VARS = 0;
@@ -33,102 +33,81 @@ function readFormula(fileName){
         }
     }
     
-   // console.log(NUM_VARS, NUM_CLAU);
-
-    var arrayVar = [];
-    var arrayClau = [];
-
-    // Fazendo o array de Variaveis
-    for (let i = 1; i <= NUM_VARS; i++){
-        let aux = new Variavel(i);
-        arrayVar.push(aux);
-    }
-
-    //console.log(arrayVar);
+    console.log(NUM_VARS, NUM_CLAU);
 
     // Fazendo o array de Clausulas
+    var arrayClauses = [];
     for (let i = 1; i <= NUM_CLAU; i++){
         let aux = text[i].split(' ');
         let aux2 = [];
         
+        // Insere no aux2 em formato de Inteiro
         for (let j = 0; j < aux.length-1; j++){
-            aux2.push(aux[j]);
+            aux2.push( parseInt(aux[j]) );
         }
-        arrayClau.push(aux2);
+
+        arrayClauses.push(aux2);
     }
 
-    console.log(arrayClau);
+    console.log(arrayClauses);
     
-    const arrayDosTestes = get2NCombs(NUM_VARS);
+    var arrayDosTestes = get2NCombs(NUM_VARS);
 
     console.log(arrayDosTestes);
+
+    if(doTest(arrayDosTestes, arrayClauses))
+        console.log('isSat');
+    else
+        console.log('Is not SAT');
+}
+
+function doTest(arrayDosTestes, arrayClauses){
+    let isSat = false;
     
-    // ERRADO A PARTIR DAQUI
+    for (let indexTeste = 0; indexTeste < arrayDosTestes.length && !isSat; indexTeste++){
+        // Manda um teste diferente a cada loop
+        for (let indexClau = 0; indexClau < arrayClauses.length; indexClau++){
+            // Manda uma clausula diferente com o mesmo teste
+            if (!doClause(arrayDosTestes[indexTeste], arrayClauses[indexClau])){
+                //se retornar alguma clausula false, o teste nao satisfaz
+                break;//quebra e vai pro proximo teste
+            }else if (indexClau === (arrayClauses.length - 1)){
+                //Se chegou aqui eh porque nao achou nenhum falso
+                isSat = true;
+            }
+        }
 
-    for (let i = 0; i < arrayDosTestes.length; i++){
-        console.log('\n' +'Versao: '+ i);
-        console.log(arrayDosTestes);
-        console.log('Estou em: ' +i);
-        let booleanDaClau = doTest(arrayDosTestes[i], arrayClau);
-           
-        // procura por um true
-            if(booleanDaClau){
-                console.log(i+' é solúvel');
-                console.log(arrayDosTestes[i]);
-            }
-        //Se tiver chegado no ultimo e nao tiver achado nenhum true, é porque nao tem solução
-            else {//if (i === arrayDosTestes.length-1){
-                console.log(i, 'nao satisfaz');
-                console.log(arrayDosTestes[i]);
-            }
     }
-
-}
-//errado
-function doTest(arrayBooleano, arrayClau){
-    // Aqui tem que testar a combinação de true/false nas clausulas
-   for (let i = 0; i < arrayClau.length; i++){
-       if (!doClau(arrayBooleano, arrayClau[i])){
-             //console.log(i, ' Retornou false');
-             return false;
-       }
-   }
-   return true;
-}
-//errado
-function doClau(arrayBooleano, arrayClauI){
-    //erro aq
-    for (let i = 0; i < arrayClauI.length; i++){
-        let auxIndex;
-
-        // Achar a variavel no arrayBool
-        // Mudar o valor caso tenha um '-'
-        if (arrayClauI[i].charAt(0) === '-'){
-            auxIndex = parseInt(arrayClauI[i].charAt(1))-1;
-            if (arrayBooleano[auxIndex])
-                arrayBooleano[auxIndex] = false;
-            else
-                arrayBooleano[auxIndex] = true;
-        }else{
-            auxIndex = parseInt(arrayClauI[i].charAt(0))-1;
-        }
-        // procurar um Verdadeiro
-        if (arrayBooleano[auxIndex] === true){
-            return true;
-        }
-      }
-    // se nao achar nenhum TRUE recebe false
+    if (isSat) return true;
     return false;
 }
 
-function Variavel(id){
-    this.id = id;
-    this.boolean = false;
+function doClause(testeAtual, clauAtual){
+    let arrayBool = [...testeAtual];
+    console.log('Testando o:\n', arrayBool, '\n na:' + clauAtual + '\n que voltou: ' );
+
+    for (let x = 0; x < clauAtual.length; x++){
+        let indexNoBool = (Math.abs(clauAtual[x]) - 1);
+        
+        // Inverter o valor
+        if (clauAtual[x] < 0){
+            arrayBool[indexNoBool] = !arrayBool[indexNoBool];
+        }
+
+        // Como se trata de UNIAO, basta um true!
+        if (arrayBool[indexNoBool]){
+            console.log('TRUE');
+            return true;
+        }
+    }
+    // Se nao achar nenhum true, eh pq eh tudo false
+    console.log('FALSE');
+    return false;
 }
 
-// in ordert to get all the tests
-    // just convert all integer from 0 through 2**n-1 to binary
 function get2NCombs(n){
+    // in ordert to get all the tests
+        // just convert all integer from 0 through 2**n-1 to binary
     //(255).toString(2);
     let arrayCombinations = [];
 
@@ -158,8 +137,8 @@ function get2NCombs(n){
     return arrayCombinations;
 }
 
-// 0 - 00
-// 1 - 01
+// 0 - 0
+// 1 - 1
 // 2 - 10
 // 3 - 11
 // 4 - 100
@@ -167,5 +146,4 @@ function get2NCombs(n){
 // 6 - 110
 // 7 - 111
 
-//readFormula('/home/CIN/alpvj/Desktop/hole1.cnf');
 //readFormula('/home/andrevas/Desktop/if669/hole1.cnf');
