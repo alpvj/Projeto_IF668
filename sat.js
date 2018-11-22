@@ -1,4 +1,4 @@
-
+readFormula('simple0.cnf');
 
 function readFormula(fileName){
     let text = [];
@@ -8,15 +8,29 @@ function readFormula(fileName){
     let file = fs.readFileSync(fileName, 'utf8');
 
     // Ler o arquivo e armazenar num array sem os comentarios
-    for (var i = 0; i < file.length; i = 1 + j){
-        let aux = '';
+    text = file.split('\n');
+    const txtL = text.length;
 
-        for (var j = i; j < file.length && file[j] != '\n' ; j++){
-            aux += file[j];
+    for (let i = 0; i < txtL; i++){
+        // tirar um c por vez
+        for (let j = 0; j < text.length; j++){
+            if (text[j].charAt(0) === 'c' || text[j].length < 1){
+                text.splice(j, 1);
+                break;
+            }
         }
 
-        if (aux.charAt(0) !== 'c' && aux.length > 0)
-            text.push(aux);
+    }
+
+    //console.log(text);
+
+    // Juntar as linhas de clausula que nao tem 0 no final
+    for (let i = 0; i < text.length; i++){
+        let auxLastIndStr = text[i].length-1;
+        if (text[i].charAt(auxLastIndStr) != '0' && text[i].charAt(0) != 'p'){
+            text[i] += ' ' + text[i+1];
+            text.splice((i+1), 1);
+        }
     }
 
     //console.log(text);
@@ -33,7 +47,7 @@ function readFormula(fileName){
         }
     }
     
-    console.log(NUM_VARS, NUM_CLAU);
+    //console.log(NUM_VARS, NUM_CLAU);
 
     // Fazendo o array de Clausulas
     var arrayClauses = [];
@@ -49,22 +63,24 @@ function readFormula(fileName){
         arrayClauses.push(aux2);
     }
 
-    console.log(arrayClauses);
+    //console.log(arrayClauses);
     
     var arrayDosTestes = get2NCombs(NUM_VARS);
 
-    console.log(arrayDosTestes);
+    //console.log(arrayDosTestes);
+    const resposta = doTest(arrayDosTestes, arrayClauses);
 
-    if(doTest(arrayDosTestes, arrayClauses))
-        console.log('isSat');
+    if (resposta.boolean){
+        console.log('isSat\nSastifying assigment:');
+        console.log(resposta.teste);
+    }
     else
         console.log('Is not SAT');
 }
 
 function doTest(arrayDosTestes, arrayClauses){
-    let isSat = false;
     
-    for (let indexTeste = 0; indexTeste < arrayDosTestes.length && !isSat; indexTeste++){
+    for (let indexTeste = 0; indexTeste < arrayDosTestes.length; indexTeste++){
         // Manda um teste diferente a cada loop
         for (let indexClau = 0; indexClau < arrayClauses.length; indexClau++){
             // Manda uma clausula diferente com o mesmo teste
@@ -73,18 +89,17 @@ function doTest(arrayDosTestes, arrayClauses){
                 break;//quebra e vai pro proximo teste
             }else if (indexClau === (arrayClauses.length - 1)){
                 //Se chegou aqui eh porque nao achou nenhum falso
-                isSat = true;
+                return {boolean: true, teste: arrayDosTestes[indexTeste]};
             }
         }
-
     }
-    if (isSat) return true;
-    return false;
+
+    return {boolean: false, teste: null}
 }
 
 function doClause(testeAtual, clauAtual){
     let arrayBool = [...testeAtual];
-    console.log('Testando o:\n', arrayBool, '\n na:' + clauAtual + '\n que voltou: ' );
+   // console.log('Testando o:\n', arrayBool, '\n na:' + clauAtual + '\n que voltou: ' );
 
     for (let x = 0; x < clauAtual.length; x++){
         let indexNoBool = (Math.abs(clauAtual[x]) - 1);
@@ -96,12 +111,12 @@ function doClause(testeAtual, clauAtual){
 
         // Como se trata de UNIAO, basta um true!
         if (arrayBool[indexNoBool]){
-            console.log('TRUE');
+            //console.log('TRUE');
             return true;
         }
     }
     // Se nao achar nenhum true, eh pq eh tudo false
-    console.log('FALSE');
+    //console.log('FALSE');
     return false;
 }
 
@@ -116,7 +131,7 @@ function get2NCombs(n){
         let textAux = (i).toString(2);
         let arrayAux = [];
 
-        // Preenchendo o text2Aux
+        // Preenchendo o textAux
         let diff = n - textAux.length;
         for (let i = 0; i < diff; i++){
             textAux = '0' + textAux;
@@ -136,14 +151,3 @@ function get2NCombs(n){
 
     return arrayCombinations;
 }
-
-// 0 - 0
-// 1 - 1
-// 2 - 10
-// 3 - 11
-// 4 - 100
-// 5 - 101
-// 6 - 110
-// 7 - 111
-
-//readFormula('/home/andrevas/Desktop/if669/hole1.cnf');
