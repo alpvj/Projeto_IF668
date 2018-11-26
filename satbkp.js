@@ -38,6 +38,9 @@ function readFormula(fileName){
     // Pegando o numero de clauses e vars
     var NUM_VARS = 0;
     var NUM_CLAU = 0;
+    // serve pra definir o array de Clauses
+    var usarNoFor = 1;
+    var retirarNoFor = 0;
 
     if (text[0].charAt(0) === 'p'){
         let arrayAux = text[0].split(' ');
@@ -45,13 +48,19 @@ function readFormula(fileName){
             NUM_VARS = arrayAux[2];
             NUM_CLAU = arrayAux[3];
         }
+    } else{
+        // Caso nao tenha a linha 'p cnf x y'
+        NUM_CLAU = text.length;
+        usarNoFor = 0;
+        retirarNoFor = 1;
     }
+
     
     //console.log(NUM_VARS, NUM_CLAU);
-
+    console.log(text);
     // Fazendo o array de Clausulas
     var arrayClauses = [];
-    for (let i = 1; i <= NUM_CLAU; i++){
+    for (let i = usarNoFor; i <= (NUM_CLAU - retirarNoFor); i++){
         let aux = text[i].split(' ');
         let aux2 = [];
         
@@ -63,8 +72,20 @@ function readFormula(fileName){
         arrayClauses.push(aux2);
     }
 
-    //console.log(arrayClauses);
+    console.log(arrayClauses);
     
+    // caso nao tenha o NUM_VARS ainda...
+    if (NUM_VARS === 0){
+        for (let i = 0; i < arrayClauses.length; i++){
+            for (let j = 0; j < arrayClauses[i].length; j++){
+                if (arrayClauses[i][j] > NUM_VARS){
+                    NUM_VARS = arrayClauses[i][j];
+                }
+            }
+        }
+    }
+
+
     var arrayDosTestes = get2NCombs(NUM_VARS);
 
     //console.log(arrayDosTestes);
