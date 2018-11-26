@@ -1,4 +1,5 @@
-readFormula('hole1.cnf');
+// Trabalho feito por André Luís Peixoto e Vasconcelos Júnior (alpvj)
+//                e   Marcos Vinicius Prysthon Nascimento (mvpn)
 
 function readFormula(fileName){
     let text = [];
@@ -8,8 +9,9 @@ function readFormula(fileName){
     let file = fs.readFileSync(fileName, 'utf8');
 
     // Ler o arquivo e armazenar num array sem os comentarios
-    text = file.split('\n');
+    text = file.split(/[\r\n]+/);
     const txtL = text.length;
+    //console.log(text);
 
     for (let i = 0; i < txtL; i++){
         // tirar um c por vez
@@ -38,6 +40,7 @@ function readFormula(fileName){
     // Pegando o numero de clauses e vars
     var NUM_VARS = 0;
     var NUM_CLAU = 0;
+    var hasProblemLine = true;
     // serve pra definir o array de Clauses
     var usarNoFor = 1;
     var retirarNoFor = 0;
@@ -53,11 +56,26 @@ function readFormula(fileName){
         NUM_CLAU = text.length;
         usarNoFor = 0;
         retirarNoFor = 1;
+        hasProblemLine = false;
     }
 
+    // Testar pra ver se o problem expecification esta certo
+        //comeca em 1 pra pular o p cnf 5 6
+        for (let i = 1, counter = 0; i < text.length && hasProblemLine; i++){
+            let auxTam;
+            auxTam = text[i].length;
+
+            if (text[i].charAt(auxTam-1) == 0)
+                counter++;
+            
+            if (i == text.length-1 && counter != NUM_CLAU){
+                console.log('There is a error on the problem expecifications!\nThe number of Clauses is problably wrong.');
+                return;
+            }
+        }
     
     //console.log(NUM_VARS, NUM_CLAU);
-    console.log(text);
+    //console.log(text);
     // Fazendo o array de Clausulas
     var arrayClauses = [];
     for (let i = usarNoFor; i <= (NUM_CLAU - retirarNoFor); i++){
@@ -72,7 +90,7 @@ function readFormula(fileName){
         arrayClauses.push(aux2);
     }
 
-    console.log(arrayClauses);
+    //console.log(arrayClauses);
     
     // caso nao tenha o NUM_VARS ainda...
     if (NUM_VARS === 0){
@@ -92,11 +110,10 @@ function readFormula(fileName){
     const resposta = doTest(arrayDosTestes, arrayClauses);
 
     if (resposta.boolean){
-        console.log('isSat\nSastifying assigment:');
-        console.log(resposta.teste);
+        console.log('isSat\nSastifying assigment:', resposta.teste);
     }
     else
-        console.log('Is not SAT');
+        console.log('Is not SAT!!!');
 }
 
 function doTest(arrayDosTestes, arrayClauses){
